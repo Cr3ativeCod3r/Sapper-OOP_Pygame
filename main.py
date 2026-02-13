@@ -1,5 +1,5 @@
 from screen import Screen
-from block import Empty, Bomb, Flag, Number
+from block import Empty, Bomb, Number
 import sys
 import pygame
 
@@ -22,9 +22,14 @@ for i in range(lvl):
         color = (i+j)%2
         x = j * block_size
         y = i * block_size + menu_height 
-        # block = Empty(new_window.screen, color, x, y, block_size)
-        # block = Number(new_window.screen, color, x, y, block_size, 10)
-        block = Flag(new_window.screen, color, x, y, block_size)
+        
+        if color == 1 :
+            block = Empty(new_window.screen, color, x, y, block_size)
+        else: 
+            block = Number(new_window.screen, color, x, y, block_size, 10)
+        
+
+        # block = Flag(new_window.screen, color, x, y, block_size)
         # block = Bomb(new_window.screen, color, x, y, block_size, 10)
         
         blocks.append(block)
@@ -45,13 +50,27 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            for block in blocks:
-                if block.rect.collidepoint(event.pos):
-                    block.clicked()
 
-            pygame.display.flip()
-            clock.tick(60)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+
+            if event.button == 1:
+                for block in blocks:
+                    if block.rect.collidepoint(mouse_pos) and block.flag is None:
+                        block.clicked()
+
+            if event.button == 3:
+                for block in blocks:
+                    if block.rect.collidepoint(mouse_pos) and block.revealed == False:
+                        block.put_flag()
+
+    new_window.screen.fill((0,0,0))
+
+    for block in blocks:
+        block.draw()
+
+    pygame.display.flip()
+    clock.tick(60)
 
 pygame.quit()
 sys.exit()
