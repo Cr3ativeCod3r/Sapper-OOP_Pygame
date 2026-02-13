@@ -2,49 +2,48 @@ from screen import Screen
 from block import Empty, Bomb, Number
 import sys
 import pygame
+import random
+from game_logic import show_all 
 
-pygame.init() 
-menu_height = 100
-width = 540
-height = 540 + menu_height
-lvl = 9
+pygame.init()
 
-blocks = []
-block_size = 60 
+# ====== CONFIG ======
+MENU_HEIGHT = 100
+GRID_SIZE = 9
+BLOCK_SIZE = 60
+WIDTH = GRID_SIZE * BLOCK_SIZE
+HEIGHT = WIDTH + MENU_HEIGHT
+BOMB_COUNT = 5
 
-new_window = Screen()
-new_window.setWindow(width, height)
+# ====== WINDOW ======
+window = Screen()
+window.setWindow(WIDTH, HEIGHT)
 
-blocks = []
+# ====== CREATE BOARD ======
+board = [[None for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
 
-for i in range(lvl):
-    for j in range(lvl):
-        color = (i+j)%2
-        x = j * block_size
-        y = i * block_size + menu_height 
-        
-        if color == 1 :
-            block = Empty(new_window.screen, color, x, y, block_size)
-        else: 
-            block = Number(new_window.screen, color, x, y, block_size, 10)
-        
-
-        # block = Flag(new_window.screen, color, x, y, block_size)
-        # block = Bomb(new_window.screen, color, x, y, block_size, 10)
-        
-        blocks.append(block)
-
-for block in blocks:
-    block.draw()
+bomb_positions = random.sample(
+    [(r, c) for r in range(GRID_SIZE) for c in range(GRID_SIZE)],
+    BOMB_COUNT
+)
 
 
-pygame.display.flip()      
+for row in range(GRID_SIZE):
+    for col in range(GRID_SIZE):
+        color = (row + col) % 2
+        x = col * BLOCK_SIZE
+        y = row * BLOCK_SIZE + MENU_HEIGHT
 
+        if (row, col) in bomb_positions:
+            block = Bomb(window.screen, color, x, y, BLOCK_SIZE)
+        else:
+            block = Empty(window.screen, color, x, y, BLOCK_SIZE)
 
+        board[row][col] = block
+
+# ====== GAME LOOP ======
 running = True
 clock = pygame.time.Clock()
-
-
 
 while running:
     for event in pygame.event.get():
@@ -52,26 +51,31 @@ while running:
             running = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_pos = pygame.mouse.get_pos()
+            mouse_x, mouse_y = pygame.mouse.get_pos()
 
-            if event.button == 1:
-                for block in blocks:
-                    if block.rect.collidepoint(mouse_pos) and block.flag is None:
-                        block.clicked()
+            col = mouse_x // BLOCK_SIZE
+            row = (mouse_y - MENU_HEIGHT) // BLOCK_SIZE
 
-            if event.button == 3:
-                for block in blocks:
-                    if block.rect.collidepoint(mouse_pos) and block.revealed == False:
-                        block.put_flag()
+            if 0 <= row < GRID_SIZE and 0 <= col < GRID_SIZE:
+                block = board[row][col]
 
-    new_window.screen.fill((0,0,0))
+                if event.button == 1 and block.flag is None:
+                    block.clicked()
+                
+                if event.button == 1 and block.flag is None and block.type == "Bomb":
+                    show_all(board)
 
-    for block in blocks:
-        block.draw()
+                if event.button == 3 and not block.revealed:
+                    block.put_flag()
+
+
+    window.screen.fill((0, 0, 0))
+    for row in board:
+        for block in row:
+            block.draw()
 
     pygame.display.flip()
     clock.tick(60)
 
 pygame.quit()
 sys.exit()
-

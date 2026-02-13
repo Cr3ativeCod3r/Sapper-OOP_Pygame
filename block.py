@@ -2,6 +2,7 @@ import pygame
 from abc import ABC
 
 
+
 class Block(ABC):
     def __init__(self, screen, color, x, y, size):
         self.screen = screen
@@ -10,15 +11,16 @@ class Block(ABC):
         self.size = size
         self.rect = pygame.Rect(x, y, size, size)
         self.flag = None
+        self.bomb = None
         self.revealed = False
         self.covered = True
 
         if color == 1:
             self.base_color = (169, 214, 79)
-            self.reveal_color = (230, 194, 158)  
+            self.reveal_color = (230, 194, 158)
         else:
             self.base_color = (161, 209, 71)
-            self.reveal_color = (214, 183, 152)  
+            self.reveal_color = (214, 183, 152)
 
         self.color = self.base_color
 
@@ -67,7 +69,7 @@ class Empty(Block):
         super().__init__(screen, color, x, y, size)
 
 
-# ================= NUMBER TILE =================
+# ================= NUMBER TILE AND BOMB TILE  =================
 
 
 class Number(Block):
@@ -87,11 +89,17 @@ class Number(Block):
             self.screen.blit(text_surface, text_rect)
 
 
-# ================= BOMB TILE =================
-
-
 class Bomb(Block):
     type = "Bomb"
 
     def __init__(self, screen, color, x, y, size):
         super().__init__(screen, color, x, y, size)
+        self.image = pygame.image.load("assets/images/bomb.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (size, size))
+        self.rect = self.image.get_rect(topleft=(x, y))
+
+    def draw(self):
+        super().draw()
+        if self.revealed:
+            self.screen.blit(self.image, self.rect)
+ 
