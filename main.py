@@ -3,7 +3,7 @@ from block import Empty, Bomb, Number
 import sys
 import pygame
 import random
-from game_logic import show_all 
+from game_logic import show_all, add_numbers_to_board
 
 pygame.init()
 
@@ -40,6 +40,9 @@ for row in range(GRID_SIZE):
             block = Empty(window.screen, color, x, y, BLOCK_SIZE)
 
         board[row][col] = block
+
+
+board = add_numbers_to_board(board,9,9)
 
 # ====== GAME LOOP ======
 running = True
