@@ -3,7 +3,7 @@ from block import Empty, Bomb, Number
 import sys
 import pygame
 import random
-from game_logic import show_all, add_numbers_to_board
+from game_logic import show_all, add_numbers_to_board, indexes_of_neighbour_blocks
 
 pygame.init()
 
@@ -13,7 +13,7 @@ GRID_SIZE = 9
 BLOCK_SIZE = 60
 WIDTH = GRID_SIZE * BLOCK_SIZE
 HEIGHT = WIDTH + MENU_HEIGHT
-BOMB_COUNT = 5
+BOMB_COUNT = 10
 
 # ====== WINDOW ======
 window = Screen()
@@ -60,13 +60,20 @@ while running:
             row = (mouse_y - MENU_HEIGHT) // BLOCK_SIZE
 
             if 0 <= row < GRID_SIZE and 0 <= col < GRID_SIZE:
+
                 block = board[row][col]
 
-                if event.button == 1 and block.flag is None:
-                    block.clicked()
-                
-                if event.button == 1 and block.flag is None and block.type == "Bomb":
-                    show_all(board)
+                if block.flag is None:
+                    if event.button == 1 and block.type == "Number":
+                        block.clicked()
+
+                    if event.button == 1 and block.type == "Empty":
+                        to_open = indexes_of_neighbour_blocks(row, col, board)
+                        for (row, col) in to_open:
+                            board[row][col].clicked()
+
+                    if event.button == 1 and block.type == "Bomb":
+                        show_all(board)
 
                 if event.button == 3 and not block.revealed:
                     block.put_flag()
