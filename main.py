@@ -1,19 +1,36 @@
-from screen import Screen
 from block import Empty, Bomb, Number
 import sys
 import pygame
 import random
-from game_logic import show_all, add_numbers_to_board, indexes_of_neighbour_blocks
+from game_logic import show_all
+
+# from algorithms.dfs import indexes_of_neighbour_empty_blocks_dfs
+from algorithms.bfs import indexes_of_neighbour_empty_blocks_bfs
+from algorithms.add_numbers_to_board import add_numbers_to_board
 
 pygame.init()
 
 # ====== CONFIG ======
+
 MENU_HEIGHT = 100
 GRID_SIZE = 9
 BLOCK_SIZE = 60
 WIDTH = GRID_SIZE * BLOCK_SIZE
 HEIGHT = WIDTH + MENU_HEIGHT
 BOMB_COUNT = 10
+
+class Screen:
+    screen = 0
+    
+    def setWindow(self, width, height):
+        self.width = width
+        self.height = height
+        self.screen = pygame.display.set_mode((width, height))
+        pygame.display.set_caption("My Game")
+        self.screen.fill((30, 30, 30))
+
+window = Screen()
+window.setWindow(WIDTH, HEIGHT)
 
 # ====== WINDOW ======
 window = Screen()
@@ -68,7 +85,7 @@ while running:
                         block.clicked()
 
                     if event.button == 1 and block.type == "Empty":
-                        to_open = indexes_of_neighbour_blocks(row, col, board)
+                        to_open = indexes_of_neighbour_empty_blocks_bfs(row, col, board)
                         for (row, col) in to_open:
                             board[row][col].clicked()
 
